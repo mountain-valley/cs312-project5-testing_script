@@ -2,8 +2,6 @@
 
 import math
 import random
-import signal
-import sys
 import time
 from enum import Enum
 import pandas as pd
@@ -31,7 +29,7 @@ from TSPSolver import *
 from TSPClasses import *
 
 
-class Tester():
+class Tester:
 
     def __init__(self):
         self.timeLimit = None
@@ -50,8 +48,6 @@ class Tester():
         self.numSolutions = None
         self._MAX_SEED = 1000
         self.algorithm = None
-        # self.enum_algo = Algorithm()
-        # self.enum_diff = Difficulty()
 
         self._scenario = None
         self.solver = TSPSolver(self.view)
@@ -87,20 +83,14 @@ class Tester():
         self._scenario = Scenario(city_locations=points, difficulty=diff, rand_seed=rand_seed)
 
         self.genParams = {'size': self.size, 'seed': self.curSeed, 'diff': diff}
-        # self.addCities()
-
-    # def addCities(self):
-    #     cities = self._scenario.getCities()
-    #     for city in cities:
-    #         self.view.addLabel(QPointF(city._x, city._y), city._name, \
-    #                            labelColor=(128, 128, 128), xoffset=10.0)
 
     def genRandSeed(self):
         self.curSeed = random.randint(0, self._MAX_SEED - 1)
 
     def returnParam(self):
-        return [self.numSolutions, self.tourCost, self.solvedIn, self._solution, self.maxQSize, self.totalStates,
-                self.prunedStates]
+        # ["size", "seed", "time", "cost", "max Q", "# soln", "tot States", "pruned"]
+        return [self.size, self.curSeed, self.solvedIn, self.tourCost, self.maxQSize, self.numSolutions,
+                self.totalStates, self.prunedStates]
 
     def solve(self, ncities=14, seed=1, randSeed=False, algo='branchAndBound', difficulty='Hard (Deterministic)',
               time_limit=60):
@@ -155,24 +145,35 @@ class Difficulty(Enum):
     HARD_DET = 'Hard (Deterministic)'
 
 if __name__ == '__main__':
-    # This line allows CNTL-C in the terminal to kill the program
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    tester = Tester()
 
-    names = ["num Solutions", "tour Cost", "time", "solution", "max Q Size", "total States", "pruned States" ]
-    # in_name = np.array([ncities, seed, randSeed, algo=Algorithm.BnB, difficulty=Difficulty.HARD_DET, time_limit])
-    inputs = [[14, 1, False, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [14, 2, False, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [14, 3, False, 'branchAndBound', 'Hard (Deterministic)', 60]]
+    names = ["size", "seed", "time", "cost", "max Q", "# soln", "tot States", "pruned"]
 
-    outputs =[]
+    outputs = []
+
+    test = Tester()
+
+    # names = [0"size", 1"seed", 2"num Solutions", 3"tour Cost", 4"time", 5"max Q Size", 6"total States",
+    # 7"pruned States"]
+    inputs = [[15, 20, False, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [16, 902, False, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [10, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [12, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [13, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [20, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [25, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [30, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [40, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
+              [50, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60]]
+
+    outputs = []
 
     for input_list in inputs:
-        tester.solve(input_list[0], input_list[1], input_list[2], input_list[3], input_list[4], input_list[5])
-        outputs.append(tester.returnParam())
-        # print(tester.returnParam())
+        test.solve(input_list[0], input_list[1], input_list[2], input_list[3], input_list[4], input_list[5])
+        outputs.append(test.returnParam())
 
     table = pd.DataFrame(outputs, columns=names)
-    print(pd)
+    pd.set_option("display.precision", 2)
+    print(table)
+    print(table.describe())
 
