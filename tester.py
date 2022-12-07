@@ -7,21 +7,8 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 
-from which_pyqt import PYQT_VER
-
-if PYQT_VER == 'PYQT5':
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-elif PYQT_VER == 'PYQT4':
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
-else:
-    raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
-
 # TODO: Error checking on txt boxes
 # TODO: Color strings
-
 
 # Import in the code with the actual implementation
 from TSPSolver import *
@@ -57,7 +44,6 @@ class Tester:
         self.data_range = {'x': [-1.5 * SCALE, 1.5 * SCALE], \
                            'y': [-SCALE, SCALE]}
 
-
     def newPoints(self):
         # TODO - ERROR CHECKING!!!!
         random.seed(self.curSeed)
@@ -89,8 +75,7 @@ class Tester:
 
     def returnParam(self):
         # ["size", "seed", "time", "cost", "max Q", "# soln", "tot States", "pruned"]
-        return [self.size, self.curSeed, self.solvedIn, self.tourCost, self.maxQSize, self.numSolutions,
-                self.totalStates, self.prunedStates]
+        return [self.size, self.solvedIn, self.tourCost, self.numSolutions]
 
     def solve(self, ncities=14, seed=1, randSeed=False, algo='branchAndBound', difficulty='Hard (Deterministic)',
               time_limit=60):
@@ -102,7 +87,6 @@ class Tester:
         self.size = ncities
         self.diff = difficulty
         self.timeLimit = time_limit
-
 
         self.algorithm = algo
         self.generateNetwork()
@@ -132,11 +116,13 @@ class Tester:
         ('Fancy', 'fancy') \
         ]  # whitespace hack to get longest to display correctly
 
+
 class Algorithm(Enum):
     DEFAULT = 'defaultRandomTour'
     GREEDY = 'greedy'
     BnB = 'branchAndBound'
     FANCY = 'fancy'
+
 
 class Difficulty(Enum):
     EASY = 'Easy'
@@ -144,36 +130,31 @@ class Difficulty(Enum):
     HARD = 'Hard'
     HARD_DET = 'Hard (Deterministic)'
 
+
 if __name__ == '__main__':
 
-
-    names = ["size", "seed", "time", "cost", "max Q", "# soln", "tot States", "pruned"]
-
-    outputs = []
+    names = ["size", "time", "cost", "# soln"]
 
     test = Tester()
 
+    inputs = []
     # names = [0"size", 1"seed", 2"num Solutions", 3"tour Cost", 4"time", 5"max Q Size", 6"total States",
-    # 7"pruned States"]
-    inputs = [[15, 20, False, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [16, 902, False, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [10, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [12, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [13, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [20, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [25, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [30, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [40, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60],
-              [50, 1, True, 'branchAndBound', 'Hard (Deterministic)', 60]]
+    # 7"pruned States"] # TODO: Should we use Hard or Hard (Deterministic)
+    algos = ['defaultRandomTour', 'greedy', 'branchAndBound', 'fancy']
+    city_sizes = [15, 30, 60, 100, 200]
 
-    outputs = []
+    totals = []
 
-    for input_list in inputs:
-        test.solve(input_list[0], input_list[1], input_list[2], input_list[3], input_list[4], input_list[5])
-        outputs.append(test.returnParam())
+    for size, algo in zip(city_sizes, algos):
+        outputs = []
+        for i in range(6):
+            test.solve(size, 1, True, algo, 'Easy', 660)
+            outputs.append(test.returnParam())
+            print(test.returnParam())
+        means = np.mean(outputs, axis=1)
+        totals.append(means)
 
-    table = pd.DataFrame(outputs, columns=names)
+    table = pd.DataFrame(totals, columns=names)
     pd.set_option("display.precision", 2)
     print(table)
     print(table.describe())
-
